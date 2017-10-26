@@ -17,9 +17,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" sceneName="scnVIew" translatesAutoresizingMaskIntoConstraints="NO" id="vSX-gw-Laz">
+                            <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" sceneName="GameScene.scn" preferredRenderingAPI="1" translatesAutoresizingMaskIntoConstraints="NO" id="vSX-gw-Laz">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="Y4h-nF-Ow9" appends="YES" id="J5R-An-4GR"/>
+                                </connections>
                             </sceneKitView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zcg-Iz-MwY">
                                 <rect key="frame" x="170.5" y="50" width="33.5" height="60"/>
@@ -35,8 +39,17 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="abJ-51-iYe"/>
                     </view>
+                    <connections>
+                        <outlet property="scnView" destination="vSX-gw-Laz" id="Vem-3W-z8u"/>
+                        <outlet property="scoreLabel" destination="zcg-Iz-MwY" id="1Yo-yg-4Gh"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="Y4h-nF-Ow9">
+                    <connections>
+                        <action selector="handleTap:" destination="BV1-FR-VrT" id="ZBm-Py-vsu"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-44" y="-109.29535232383809"/>
         </scene>

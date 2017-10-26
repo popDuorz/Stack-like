@@ -26,20 +26,104 @@ import SpriteKit
 
 class GameViewController: UIViewController {
     
-  @IBOutlet weak var scnView: SCNView!
+    @IBOutlet weak var scnView: SCNView!
   
     @IBOutlet weak var scoreLabel: UILabel!
+    
     var scnScene: SCNScene!
+    
+    var height = 0
+    var direction = true
+    
+    var previewSize = SCNVector3(0.7, 0.2, 0.7)
+    var previewPosition = SCNVector3(0, 0.1, 0)
+    var currentSize = SCNVector3(0.7, 0.2, 0.7)
+    var currentPosition = SCNVector3Zero
+    
+    var offset = SCNVector3Zero
+    var absoluteOffset = SCNVector3Zero
+    var newSize = SCNVector3Zero
+    
+    var perfectMatches = 0
   
-  override func viewDidLoad() {
-    super.viewDidLoad()
+    override func viewDidLoad() {
+        super.viewDidLoad()
   
-    scnScene = SCNScene(named: "HighRise.scnassets/Scenes/GameScene.scn")
-    scnView.scene = scnScene
-  }
-  
-  override var prefersStatusBarHidden: Bool {
-    return true
-  }
-  
+        scnScene = SCNScene(named: "art.scnassets/Scenes/GameScene.scn")
+        scnView.scene = scnScene
+        
+        let box = SCNBox(width: 0.7, height: 0.2, length: 0.7, chamferRadius: 0)
+        let blockNode = SCNNode(geometry: box)
+        blockNode.position.z = -0.85
+        blockNode.position.y = 0.1
+        blockNode.name = "Block\(height)"
+        
+        blockNode.geometry?.firstMaterial?.diffuse.contents = UIColor(displayP3Red: 0.01 * CGFloat(height), green: 0, blue: 1, alpha: 1)
+        
+        scnScene.rootNode.addChildNode(blockNode)
+        
+        scnView.isPlaying = true
+        scnView.delegate = self
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+    
+    
+    @IBAction func handleTap(_ sender: UITapGestureRecognizer) {
+        
+        
+    }
+    
+}
+
+extension GameViewController: SCNSceneRendererDelegate {
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        
+        if let currentNode = scnScene.rootNode.childNode(withName: "Block\(height)", recursively: false) {
+            
+            if height % 2 == 0 {
+                
+                if currentNode.position.z >= 0.85 {
+                    
+                    direction = true
+                }
+                else if currentNode.position.z <= -0.85 {
+                    
+                    direction = false
+                }
+                
+                switch direction {
+                    
+                case true:
+                    currentNode.position.z -= 0.03
+                    
+                case false:
+                    currentNode.position.z += 0.03
+                }
+            }
+            else {
+                
+                if currentNode.position.x >= 0.85 {
+                    
+                    direction = true
+                }
+                else if currentNode.position.x <= -0.85 {
+                    
+                    direction = false
+                }
+                
+                switch direction {
+                    
+                case true:
+                    currentNode.position.x -= 0.03
+                    
+                case false:
+                    currentNode.position.x += 0.03
+                }
+            }
+        }
+    }
 }
