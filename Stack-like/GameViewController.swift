@@ -45,11 +45,16 @@ class GameViewController: UIViewController {
     var newSize = SCNVector3Zero
     
     var perfectMatches = 0
+    
+    var sounds = [String : SCNAudioSource]()
   
     override func viewDidLoad() {
         super.viewDidLoad()
   
         scnScene = SCNScene(named: "art.scnassets/Scenes/GameScene.scn")
+        loadSound(name: "gameOver", path: "art.scnassets/Audio/GameOver.wav")
+        loadSound(name: "perfectMatch", path: "art.scnassets/Audio/PerfectFit.wav")
+        loadSound(name: "Miss", path: "art.scnassets/Audio/SliceBlock.wav")
         scnView.scene = scnScene
         
         let box = SCNBox(width: 0.7, height: 0.2, length: 0.7, chamferRadius: 0)
@@ -70,8 +75,8 @@ class GameViewController: UIViewController {
         return true
     }
     
-    
     @IBAction func handleTap(_ sender: UITapGestureRecognizer) {
+        
         if let currentBoxNode = scnScene.rootNode.childNode(withName: "Block\(height)", recursively: false) {
             currentPosition = currentBoxNode.presentation.position
 //            let max = currentBoxNode.boundingBox.max
@@ -82,13 +87,19 @@ class GameViewController: UIViewController {
             absoluteOffset = offset.absoluteValue()
             newSize = previousSize - absoluteOffset
             
+            if checkEntireMiss(currentBoxNode) {
+                playSound(sound: "Miss", node: currentBoxNode)
+                return
+            }
+            if !checkPerfectMatch(currentBoxNode) {
+                addBrokenBlock(currentBoxNode)
+            }
             currentBoxNode.geometry = SCNBox(width: CGFloat(newSize.x), height: 0.2, length: CGFloat(newSize.z), chamferRadius: 0)
             currentBoxNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(height)/10.0, green: CGFloat(height)/20.0, blue: CGFloat(height)/30.0, alpha: 1)
             currentBoxNode.position = SCNVector3Make(currentPosition.x + offset.x / 2, currentPosition.y, currentPosition.z + offset.z / 2)
             currentBoxNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(geometry: currentBoxNode.geometry!, options: nil))
  
             addNewBlock(currentBoxNode)
-            addBrokenBlock(currentBoxNode)
             if height >= 5 {
                 let moveUpAction = SCNAction.move(by: SCNVector3(0, 0.2, 0), duration: 0.2)
                 let mainCamera = scnScene.rootNode.childNode(withName: "MainCamera", recursively: false)!
@@ -97,8 +108,9 @@ class GameViewController: UIViewController {
             previousSize = SCNVector3Make(newSize.x, 0.2, newSize.z)
             previousPosition = currentBoxNode.position
             height += 1
+            scoreLabel.text = "\(height)"
         }
-        scoreLabel.text = "\(height)"
+        
     }
     
     func addNewBlock(_ currentBoxNode: SCNNode) {
@@ -120,6 +132,7 @@ class GameViewController: UIViewController {
     }
     
     func addBrokenBlock(_ currentBoxNode: SCNNode) {
+        
         let brokenBoxNode = SCNNode()
         if height % 2 == 0 && absoluteOffset.z > 0 {
             if currentPosition.z > 0 {
@@ -143,6 +156,51 @@ class GameViewController: UIViewController {
         brokenBoxNode.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: brokenBoxNode.geometry!, options: nil))
         brokenBoxNode.name = "Broken\(height)"
         scnScene.rootNode.addChildNode(brokenBoxNode)
+    }
+    
+    func checkPerfectMatch(_ currentBoxNode: SCNNode)-> Bool {
+        
+        if height % 2 == 0 && absoluteOffset.z <= 0.03 {
+            currentBoxNode.position.z = previousPosition.z
+            currentPosition.z = previousPosition.z
+            playSound(sound: "perfectMatch", node: currentBoxNode)
+
+            return true
+        }
+        else if height % 2 != 0 && absoluteOffset.x <= 0.03 {
+            currentBoxNode.position.x = previousPosition.x
+            currentPosition.z = previousPosition.z
+            playSound(sound: "perfectMatch", node: currentBoxNode)
+
+            return true
+        }
+        return false
+    }
+    
+    func checkEntireMiss(_ currentBoxNode: SCNNode) -> Bool {
+        
+        if (height % 2 == 0 && newSize.z <= 0) || (height % 2 != 0 && newSize.x <= 0) {
+            
+            height += 1
+            currentBoxNode.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: currentBoxNode.geometry!, options: nil))
+            return true
+        }
+        return false
+    }
+    
+    func loadSound(name: String, path: String) {
+        
+        if let sound = SCNAudioSource(fileNamed: path) {
+            
+            sound.isPositional = false
+            sound.load()
+            sound.volume = 1.0
+            sounds[name] = sound
+        }
+    }
+    
+    func playSound(sound: String, node: SCNNode) {
+        node.runAction(SCNAction.playAudio(sounds[sound]!, waitForCompletion: false))
     }
 }
 
