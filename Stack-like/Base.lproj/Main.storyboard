@@ -31,15 +31,28 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eCc-fd-QGT">
+                                <rect key="frame" x="112.5" y="288" width="150" height="91"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="66"/>
+                                <state key="normal" title="PLAY">
+                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="PlayGame:" destination="BV1-FR-VrT" eventType="touchUpInside" id="2Zc-D4-3Ht"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="eCc-fd-QGT" firstAttribute="centerY" secondItem="hPf-f0-2tI" secondAttribute="centerY" id="3S5-31-ye1"/>
                             <constraint firstItem="zcg-Iz-MwY" firstAttribute="top" secondItem="abJ-51-iYe" secondAttribute="top" constant="30" id="8ZA-4P-oNn"/>
+                            <constraint firstItem="eCc-fd-QGT" firstAttribute="centerX" secondItem="hPf-f0-2tI" secondAttribute="centerX" id="X08-JK-8sC"/>
                             <constraint firstItem="zcg-Iz-MwY" firstAttribute="centerX" secondItem="hPf-f0-2tI" secondAttribute="centerX" id="ab1-Mh-jMR"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="abJ-51-iYe"/>
                     </view>
                     <connections>
+                        <outlet property="playButton" destination="eCc-fd-QGT" id="1CS-xa-QGk"/>
                         <outlet property="scnView" destination="vSX-gw-Laz" id="Vem-3W-z8u"/>
                         <outlet property="scoreLabel" destination="zcg-Iz-MwY" id="1Yo-yg-4Gh"/>
                     </connections>

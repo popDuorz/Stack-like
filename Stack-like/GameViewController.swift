@@ -23,11 +23,14 @@
 import UIKit
 import SceneKit
 import SpriteKit
+import SpriteKit
 
 class GameViewController: UIViewController {
     
     @IBOutlet weak var scnView: SCNView!
   
+    @IBOutlet weak var playButton: UIButton!
+    
     @IBOutlet weak var scoreLabel: UILabel!
     
     var scnScene: SCNScene!
@@ -56,17 +59,7 @@ class GameViewController: UIViewController {
         loadSound(name: "perfectMatch", path: "art.scnassets/Audio/PerfectFit.wav")
         loadSound(name: "Miss", path: "art.scnassets/Audio/SliceBlock.wav")
         scnView.scene = scnScene
-        
-        let box = SCNBox(width: 0.7, height: 0.2, length: 0.7, chamferRadius: 0)
-        let blockNode = SCNNode(geometry: box)
-        blockNode.position.z = -0.7
-        blockNode.position.y = 0.1
-        blockNode.name = "Block\(height)"
-        
-        blockNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(height)/10.0, green: CGFloat(height)/20.0, blue: CGFloat(height)/30.0, alpha: 1)
-        
-        scnScene.rootNode.addChildNode(blockNode)
-        
+
         scnView.isPlaying = true
         scnView.delegate = self
     }
@@ -74,15 +67,40 @@ class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool {
         return true
     }
+
+    @IBAction func PlayGame(_ sender: Any) {
+
+        playButton.isHidden = true
+
+        let gameScene = SCNScene(named: "art.scnassets/Scenes/GameScene.scn")
+        scnScene = gameScene
+        let transtion = SKTransition.fade(withDuration: 1.0)
+        let mainCamera = scnScene.rootNode.childNode(withName: "MainCamera", recursively: false)
+
+        scnView.present(scnScene, with: transtion, incomingPointOfView: mainCamera)
+
+        height = 0
+        scoreLabel.text = "\(height)"
+        direction = true
+        perfectMatches = 0
+
+        currentPosition = SCNVector3Zero
+        previousPosition = SCNVector3(x: 0, y: 0.1, z: 0)
+        previousSize = SCNVector3(x: 0.7, y: 0.2, z: 0.7)
+
+        let boxNode = SCNNode(geometry: SCNBox(width: 0.7, height: 0.2, length: 0.7, chamferRadius: 0))
+        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: CGFloat(height)/10.0, green: CGFloat(height)/20.0, blue: CGFloat(height)/30.0, alpha: 1)
+        boxNode.name = "Block\(height)"
+        boxNode.position = SCNVector3(x: 0, y: 0.1, z: -0.7)
+        scnScene.rootNode.addChildNode(boxNode)
+
+    }
     
     @IBAction func handleTap(_ sender: UITapGestureRecognizer) {
         
         if let currentBoxNode = scnScene.rootNode.childNode(withName: "Block\(height)", recursively: false) {
             currentPosition = currentBoxNode.presentation.position
-//            let max = currentBoxNode.boundingBox.max
-//            let min = currentBoxNode.boundingBox.min
-//            currentSize = max - min
-            
+
             offset = previousPosition - currentPosition
             absoluteOffset = offset.absoluteValue()
             newSize = previousSize - absoluteOffset
@@ -183,6 +201,7 @@ class GameViewController: UIViewController {
             
             height += 1
             currentBoxNode.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: currentBoxNode.geometry!, options: nil))
+            gameOver()
             return true
         }
         return false
@@ -202,6 +221,27 @@ class GameViewController: UIViewController {
     func playSound(sound: String, node: SCNNode) {
         node.runAction(SCNAction.playAudio(sounds[sound]!, waitForCompletion: false))
     }
+
+    func gameOver() {
+        let mainCamera = scnScene.rootNode.childNode(
+                withName: "MainCamera", recursively: false)!
+
+        let fullAction = SCNAction.customAction(duration: 0.3) { _,_ in
+            let moveAction = SCNAction.move(to: SCNVector3Make(mainCamera.position.x,
+                    mainCamera.position.y * (3/4), mainCamera.position.z), duration: 0.3)
+            mainCamera.runAction(moveAction)
+            if self.height <= 15 {
+                mainCamera.camera?.orthographicScale = 1
+            } else {
+                mainCamera.camera?.orthographicScale = Double(Float(self.height/2) /
+                        mainCamera.position.y)
+            }
+        }
+
+        mainCamera.runAction(fullAction)
+        playButton.isHidden = false
+    }
+
 }
 
 extension GameViewController: SCNSceneRendererDelegate {
